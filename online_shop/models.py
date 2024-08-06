@@ -34,7 +34,6 @@ class Product(BaseModel):
     image = models.ImageField(upload_to='products', null=True)
     category = models.ForeignKey(Catagory, on_delete=models.CASCADE, related_name='products')
     quantity = models.IntegerField(default=0)
-<<<<<<< HEAD
     raiting = models.PositiveSmallIntegerField(choices=RatingChoices.choices, default=RatingChoices.zero, null = True,blank=True)
     discount = models.PositiveSmallIntegerField(null=True,blank=True)
 
@@ -43,10 +42,8 @@ class Product(BaseModel):
         if self.image:
             return self.image.url
         return None
-=======
-    raiting = models.PositiveSmallIntegerField(choices=RatingChoices.choices, default=RatingChoices.zero)
-    discount = models.PositiveSmallIntegerField(default=0)
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
+    # raiting = models.PositiveSmallIntegerField(choices=RatingChoices.choices, default=RatingChoices.zero)
+    # discount = models.PositiveSmallIntegerField(default=0)
 
     @property
     def discounted_price(self):
@@ -58,26 +55,22 @@ class Product(BaseModel):
         return self.name
 
 
+    def get_related_products(self):
+        return Product.objects.filter(category=self.category).exclude(id=self.id)[:5]
+
+
 class Comment(BaseModel):
     user = models.ForeignKey(User,max_length=100, on_delete=models.CASCADE)
     email = models.EmailField(max_length=255)
     body = models.TextField()
-<<<<<<< HEAD
     product = models.ForeignKey('Product', related_name='comments', on_delete=models.CASCADE)
-=======
-    product = models.ForeignKey(Product, related_name='comments', on_delete=models.CASCADE)
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
     is_provide = models.BooleanField(default=False)
     def __str__(self):
         return f'Comment by {self.user.username} on {self.product.name}'
 
 
 class Order(models.Model):
-<<<<<<< HEAD
     name = models.CharField(max_length=100)
-=======
-    name = models.ForeignKey(User, on_delete=models.CASCADE)
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
     product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='order')
     quantity = models.PositiveIntegerField()
     phone = models.CharField(max_length=15)
@@ -91,6 +84,6 @@ class Order(models.Model):
 
 
     def __str__(self):
-        return f'Order by {self.name.username} for {self.product.name}'
+        return f'Order by {self.name} for {self.product.name}'
 
 

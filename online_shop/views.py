@@ -1,31 +1,45 @@
 from typing import Optional
-
-<<<<<<< HEAD
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from online_shop.forms import CommentModelForm, OrderModelForm, ProductModelForm
 from online_shop.models import Catagory, Product, Comment
-=======
 from django.shortcuts import render,redirect,get_object_or_404
 
 from online_shop.models import Catagory, Product,Comment
 from online_shop.forms import CommentModelForm,OrderModelForm
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
-
+from django.db.models import Q
 
 def product_list(request, catagory_id: Optional[int] = None):
     catagories = Catagory.objects.all().order_by(('id'))
+    search = request.GET.get('q')
+    filter_type = request.GET.get('filter','')
     if catagory_id:
-        products = Product.objects.filter(category=catagory_id)
+        if filter_type == 'expensive':
+              products = Product.objects.filter(category=catagory_id).order_by('-price')
+        elif filter_type == 'cheap':
+            products = Product.objects.filter(category=catagory_id).order_by('price')
+        elif filter_type == 'rating':
+            products = Product.objects.filter(Q(category=catagory_id) & Q(rating__gte=4)).order_by('-price')
+        else:
+            products = Product.objects.filter(category=catagory_id)
+
     else:
-        products = Product.objects.all()
+        if filter_type == 'expensive':
+              products = Product.objects.all().order_by('-price')
+        elif filter_type == 'cheap':
+            products = Product.objects.all().order_by('price')
+        elif filter_type == 'rating':
+            products = Product.objects.filter(Q(rating__gte=4)).order_by('-rating')
+        else:
+            products = Product.objects.all()
+
+
+    if search:
+        products = products.filter(Q(name__icontains=search))
+
     context = {'products': products,
-<<<<<<< HEAD
                'catagories': catagories
-=======
-               'catagories':catagories
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
 
                }
 
@@ -33,24 +47,18 @@ def product_list(request, catagory_id: Optional[int] = None):
 
 
 def product_detail(request, product_id):
-<<<<<<< HEAD
+    catagories = Catagory.objects.all()
+    related_products = Product.get_related_products(self=product_id)
     comments = Comment.objects.filter(product=product_id, is_provide=True).order_by('-id')
     product = Product.objects.get(id=product_id)
     context = {'product': product,
-               'comments': comments
+               'comments': comments,
+               'catagories':catagories,
+               'related_products': related_products
                }
     return render(request, 'online_shop/detail.html', context)
 
 
-=======
-    comments = Comment.objects.filter(product=product_id,is_provide=True).order_by('-id')
-    product = Product.objects.get(id=product_id)
-    context = {'product': product,
-               'comments':comments
-               }
-    return render(request, 'online_shop/detail.html', context)
-
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
 # def add_comment(request,product_id):
 #     product = get_object_or_404(Product,id = product_id)
 #     if request.method == 'POST':
@@ -66,7 +74,6 @@ def product_detail(request, product_id):
 #         pass
 #     return render(request,'online_shop/detail.html')
 
-<<<<<<< HEAD
 def add_comment(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == 'POST':
@@ -143,38 +150,5 @@ def edit_product(request,product_id):
         if form.is_valid():
             form.save()
             return redirect('product_detail',product_id)
+
     return render(request,'online_shop/edit-product.html',{'form':form})
-=======
-def add_comment(request,product_id):
-    product = get_object_or_404(Product,id=product_id)
-    if request.method =='POST':
-        form = CommentModelForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.product=product
-            comment.save()
-            return redirect('product_detail',product_id)
-    else:
-        form = CommentModelForm()
-
-    return render(request,'online_shop/detail.html',{'form':form})
-
-def add_order(request,product_id):
-    product = get_object_or_404(Product,id=product_id)
-    if request.method=='POST':
-        form = OrderModelForm(request.POST)
-        if form.is_valid():
-            product.quantity -= int(form.data.get('quantity'))
-            order = form.save(commit=False)
-            order.product = product
-            order.save()
-            if order.quantity < product.quantity:
-                return render(request, 'online_shop/detail.html', {'form': form, 'product': product, })
-            order.save()
-            return redirect('product_detail',product_id)
-    else:
-        form= OrderModelForm()
-    contex = {'form':form,'product':product}
-    return render(request,'online_shop/detail.html',contex)
-
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91

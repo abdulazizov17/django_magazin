@@ -22,10 +22,7 @@ from config import settings
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
-<<<<<<< HEAD
                   path('index/', include('online_shop.urls')),
-=======
                   path('', include('online_shop.urls')),
->>>>>>> 7c1216a9553a9c89b64673b2b36b55632b600d91
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

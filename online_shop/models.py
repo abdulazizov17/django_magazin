@@ -1,6 +1,8 @@
 # models.py
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.text import slugify
+
 
 class BaseModel(models.Model):
         create_at =models.DateTimeField(auto_now=True)
@@ -11,12 +13,20 @@ class BaseModel(models.Model):
 
 class Catagory(models.Model):
     title = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField()
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Catagory, self).save(*args, **kwargs)
     class Meta:
-        verbose_name_plural = 'Catagories'
+        verbose_name_plural = 'Catagories',
+        db_table = 'Catagory'
 
 
     def __str__(self):
         return self.title
+
 
 
 class Product(BaseModel):
@@ -37,6 +47,8 @@ class Product(BaseModel):
     raiting = models.PositiveSmallIntegerField(choices=RatingChoices.choices, default=RatingChoices.zero, null = True,blank=True)
     discount = models.PositiveSmallIntegerField(null=True,blank=True)
 
+
+
     @property
     def get_image_url(self):
         if self.image:
@@ -55,8 +67,11 @@ class Product(BaseModel):
         return self.name
 
 
-    def get_related_products(self):
-        return Product.objects.filter(category=self.category).exclude(id=self.id)[:5]
+    class Meta:
+        db_table = 'Product'
+    #
+    # def get_related_products(self):
+    #     return Product.objects.filter(category=self.category).exclude(id=self.id)[:5]
 
 
 class Comment(BaseModel):
@@ -67,6 +82,10 @@ class Comment(BaseModel):
     is_provide = models.BooleanField(default=False)
     def __str__(self):
         return f'Comment by {self.user.username} on {self.product.name}'
+
+
+    class Meta:
+        db_table = 'Comment'
 
 
 class Order(models.Model):
@@ -86,4 +105,6 @@ class Order(models.Model):
     def __str__(self):
         return f'Order by {self.name} for {self.product.name}'
 
+    class Meta:
+        db_table = 'Order'
 

@@ -10,19 +10,19 @@ from online_shop.models import Catagory, Product,Comment
 from online_shop.forms import CommentModelForm,OrderModelForm
 from django.db.models import Q
 
-def product_list(request, catagory_id: Optional[int] = None):
+def product_list(request, catagory_slug: Optional[str] = None):
     catagories = Catagory.objects.all().order_by(('id'))
     search = request.GET.get('q')
     filter_type = request.GET.get('filter','')
-    if catagory_id:
+    if catagory_slug:
         if filter_type == 'expensive':
-              products = Product.objects.filter(category=catagory_id).order_by('-price')
+              products = Product.objects.filter(category__slug=catagory_slug).order_by('-price')
         elif filter_type == 'cheap':
-            products = Product.objects.filter(category=catagory_id).order_by('price')
+            products = Product.objects.filter(category__slug=catagory_slug).order_by('price')
         elif filter_type == 'rating':
-            products = Product.objects.filter(Q(category=catagory_id) & Q(rating__gte=4)).order_by('-price')
+            products = Product.objects.filter(Q(category__slug=catagory_slug) & Q(rating__gte=4)).order_by('-price')
         else:
-            products = Product.objects.filter(category=catagory_id)
+            products = Product.objects.filter(category__slug=catagory_slug)
 
     else:
         if filter_type == 'expensive':
@@ -48,13 +48,15 @@ def product_list(request, catagory_id: Optional[int] = None):
 
 def product_detail(request, product_id):
     catagories = Catagory.objects.all()
-    related_products = Product.get_related_products(self=product_id)
-    comments = Comment.objects.filter(product=product_id, is_provide=True).order_by('-id')
     product = Product.objects.get(id=product_id)
+    min_price = product.price*0.2
+    max_price = product.price*1.8
+    simmilar_products = Product.objects.filter(category=product.category,price__range=[min_price,max_price]).exclude(id=product_id)
+    comments = Comment.objects.filter(product=product_id, is_provide=True).order_by('-id')
     context = {'product': product,
                'comments': comments,
                'catagories':catagories,
-               'related_products': related_products
+               'simmilar_products':simmilar_products
                }
     return render(request, 'online_shop/detail.html', context)
 

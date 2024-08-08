@@ -154,3 +154,4 @@ def edit_product(request,product_id):
             return redirect('product_detail',product_id)
 
     return render(request,'online_shop/edit-product.html',{'form':form})
+

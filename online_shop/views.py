@@ -153,13 +153,3 @@ def edit_product(request,product_id):
 
     return render(request,'online_shop/edit-product.html',{'form':form})
 
-
-@login_required
-def category_detail(request, category_id):
-    category = get_object_or_404(Category, id=category_id)
-    products = Product.objects.filter(category=category)
-    contex = {
-        'category': category,
-        'products': products
-    }
-    return render(request, 'category_detail.html',contex)

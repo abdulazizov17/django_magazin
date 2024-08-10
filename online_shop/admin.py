@@ -8,7 +8,7 @@ from django.utils.html import mark_safe
 # admin.site.register(Comment)
 # admin.site.register(Order)
 
-admin.site.unregister(User)
+# admin.site.unregister(User)
 admin.site.unregister(Group)
 
 
